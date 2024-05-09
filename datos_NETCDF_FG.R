@@ -100,6 +100,11 @@ if ((QNlon-pr2$dim$lon$vals[corLon])>(pr2$dim$lon$vals[corLon+1]-QNlon)){
 # puedo seleccionar dichas coordenadas, trabajar con ellas y olvidarme del resto del
 # archivo. OJO CON TRANSFORMAR UNIDADES!
 
+# =====================================================================
+
+# Se puede hacer una funcion para automatizar esto de dejar la data em aux y aux2.
+# Y que ademas no asuma que todos los dias tienen 30 dias.
+
 # Dentro de los archivos "data" y "data2", tenemos en la primera coordenada la longitud, en la segunda
 # la latitud y en la tercera la serie de tiempo de precipitaciones, por lo que le entregamos
 # la primera coordenada y la segunda, la tercera se deja vacía, dado que queremos obtener la
@@ -110,3 +115,32 @@ aux2<-data2[corLon,corLat, ]* (1000*3600*24*30/1000)
 
 # Finalmente, tenemos que en aux y aux2 quedan almacenados una serie de tiempo mensual de
 # precipitaciones simuladas por el GCM para el período histórico y para el futuro.
+
+# =====================================================================
+
+# Ya leímos los archivos, ahora pasemos a hacer un par de gráficos. Graficar los valores de
+# precipitaciones de los NetCDF. Primero uno a nivel mensual, luego uno a nivel anual.
+
+# Generamos una serie de tiempo con los años para graficar
+year<-1850:2100
+
+# Concatenamos la serie de tiempo del período histórico, junto a la serie de tiempo del período
+# futuro "aux" y "aux2", para formar una única serie de tiempo "AUX"
+AUX<-c(aux,aux2)
+# Graficamos esta única serie de tiempo
+plot(AUX, type="l")
+
+# Reorganizamos la serie AUX en un arreglo con 2 dimensiones, en la cual la primera dimensión tiene
+# 12 valores (uno por cada mes) y el segundo tiene el número de años, el cual se calcula como el
+# cuociente entre el número total de meses (length(AUX)) y 12 (12 meses por año).
+Norder<-array(AUX,c(12,length(AUX)/12))
+
+# Ahora pasamos a sumar los valores, manteniendo la segunda dimensión (es decir suma en la dimensión
+# de los meses) para llegar a los valores anuales
+AUXAn<-apply(Norder,2,sum)
+
+# Por último pasamos a graficar una línea que tiene los valores anuales que acabamos de obtener
+plot(year,AUXAn, type="l", ylab = "Precipitación [mm]",xlab = "Años",
+     col=rgb(.22,.35,.85) , ylim = range(0,max(AUXAn)*1.8))
+
+
