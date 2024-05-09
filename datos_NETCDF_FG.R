@@ -100,4 +100,13 @@ if ((QNlon-pr2$dim$lon$vals[corLon])>(pr2$dim$lon$vals[corLon+1]-QNlon)){
 # puedo seleccionar dichas coordenadas, trabajar con ellas y olvidarme del resto del
 # archivo. OJO CON TRANSFORMAR UNIDADES!
 
+# Dentro de los archivos "data" y "data2", tenemos en la primera coordenada la longitud, en la segunda
+# la latitud y en la tercera la serie de tiempo de precipitaciones, por lo que le entregamos
+# la primera coordenada y la segunda, la tercera se deja vacía, dado que queremos obtener la
+# serie de tiempo completa
 
+aux<-data[corLon,corLat, ]* (1000*3600*24*30/1000)
+aux2<-data2[corLon,corLat, ]* (1000*3600*24*30/1000)
+
+# Finalmente, tenemos que en aux y aux2 quedan almacenados una serie de tiempo mensual de
+# precipitaciones simuladas por el GCM para el período histórico y para el futuro.
