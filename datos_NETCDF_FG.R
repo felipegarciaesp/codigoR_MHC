@@ -143,4 +143,62 @@ AUXAn<-apply(Norder,2,sum)
 plot(year,AUXAn, type="l", ylab = "Precipitación [mm]",xlab = "Años",
      col=rgb(.22,.35,.85) , ylim = range(0,max(AUXAn)*1.8))
 
+# Ahora queda leer los archivos de los datos del CR2MET V2.0 de precipitaciones, para
+# trabajar con estos datos y poder agregarlos al gráfico.
 
+# Para poder graficar contra los datos observados, tenemos que importar los
+# datos observados. para esto importamos el archivo CR2MET de precipitaciones
+# mensuales
+name3<-"CR2MET_pr_v2_0_mon_1979_2019_005deg.nc"
+
+# Abrimos el archivo tipo NetCDF
+pr3<-nc_open(name3)
+
+# Encontramos la latitud menor
+corLat_2<-max(which(pr3$dim$lat$vals<QNlat))
+
+# Verificamos si la latitud que nos interesa está más cerca de la latitud
+# inferior o más cerca de la superior
+if ((QNlat-pr3$dim$lat$vals[corLat_2])>(pr3$dim$lat$vals[corLat_2+1]-QNlat)){
+  corLat_2=corLat_2+1}
+
+# Repetimos el proceso para las longitudes. Ahora tener cuidado que las
+# longitudes en el NetCDF de CR2MET están guardadas con un formato levemente
+# diferente
+QNlon_2<-(longitud)
+corLon_2<-max(which(pr3$dim$lon$vals<QNlon_2))
+if ((QNlon_2-pr3$dim$lon$vals[corLon_2])>(pr3$dim$lon$vals[corLon_2+1]-QNlon_2)){
+  corLon_2=corLon_2+1}
+
+# Si se quiere ser más eficiente en el uso de la memoria RAM del computador, o
+# en caso de que el archivo que se esté abriendo sea tan grande que el computador
+# no sea capaz de leerlo. Se recomienda en vez de extraer todos los datos del
+# NetCDF, extraer con "ncvar_get" solo los datos que nos interesan.
+
+# Primero estimar el número de valores en el tiempo
+nt<-dim(pr3$dim$time$vals)
+
+# Luego dentro del comando "ncvar_get", además de darle la varaible tipo NetCDF
+# hay que especificar la varaible que se va a extraer, en este caso la
+# precipitación, que tiene nombre "pr". Luego, el punto de partida de los datos
+# que serán extraídos con "start", este tiene las coordenadas y un "1" dado que
+# comenzaremos con el primer mes. Por último "count" nos dice cuántas variables
+# vamos a extraer por dimensión, en este caso es 1 longitud, 1 latitud y todo el
+# tiempo. Esto se guarda en "a".
+a<-ncvar_get(pr3,varid="pr",start = c(corLon_2,corLat_2,1), count=c(1,1,nt))
+
+x<-1979:2019
+
+# Se cambia las dimensiones del arreglo de vector columna a un arreglo con 2 dimensiones,
+# en la primera (filas) están los meses y columnas los años.
+Norder1<-array(a,c(12,nt/12))
+
+# Al llegar a este punto, en vez de guardar el dato de un solo mes, suma los datos de
+# los 12 meses, para obtener los valores de precipitación anual. El comando "apply",
+# permite sumar (además de tener otras funciones). Sumas al usar "sum" y el 2, indica
+# en qué dirección tiene que sumar
+y<-apply(Norder1,2,sum)
+
+# Este comando permite graficar en el mismo gráfico los datos medidos en Cuenca Cauquenes
+matplot(x,y,type="l" , add = TRUE, col=rgb(.8,.15,.25))
+legend(2035, 2800, legend=c("GCM", "Obs"), col=c(rgb(.22,.35,.85),rgb(.8,.15,.25)), lty=1, cex=0.8)
