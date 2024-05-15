@@ -12,6 +12,24 @@ library(ncdf4)
 setwd("C:/Users/Usuario/Codigos_R/leer_datos_NETCDF")
 getwd()
 
+# Definicion de funciones:
+coordenadas <- function(lat, lon) {
+  QNlat <- lat
+  corLat <- max(which(pr2$dim$lat$vals<QNlat))
+  if ((QNlat-pr2$dim$lat$vals[corLat])>(pr2$dim$lat$vals[corLat+1]-QNlat)){
+    corLat=corLat+1
+  }
+  QNlon<-(360+lon)
+  
+  corLon<-max(which(pr2$dim$lon$vals<QNlon))
+  if ((QNlon-pr2$dim$lon$vals[corLon])>(pr2$dim$lon$vals[corLon+1]-QNlon)){
+    corLon=corLon+1
+  }
+  resultados <- list(corLat = corLat, corLon = corLon)
+  return(resultados)
+}
+
+
 # Importar archivos NetCDF (los GCM).
 name <- "pr_Amon_ACCESS-CM2_historical_r1i1p1f1_gn_185001-201412.nc"
 name2 <- "pr_Amon_ACCESS-CM2_ssp585_r1i1p1f1_gn_201501-210012.nc"
@@ -55,6 +73,11 @@ data2 <- ncvar_get(pr2)
 
 latitud <- -35.90
 longitud <- -72.05
+
+coordenadas <- coordenadas(lat = latitud, lon = longitud)
+
+corLat <- coordenadas$corLat
+corLon <- coordenadas$corLon
 
 QNlat <- latitud
 
