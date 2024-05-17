@@ -13,10 +13,10 @@ setwd("C:/Users/Usuario/Codigos_R/leer_datos_NETCDF")
 getwd()
 
 # Definicion de funciones:
-coordenadas <- function(ID, lat, lon) {
+coordenadas <- function(ID, netcdf, lat, lon) {
   QNlat <- lat
-  corLat <- max(which(pr2$dim$lat$vals<QNlat))
-  if ((QNlat-pr2$dim$lat$vals[corLat])>(pr2$dim$lat$vals[corLat+1]-QNlat)){
+  corLat <- max(which(netcdf$dim$lat$vals<QNlat))
+  if ((QNlat-netcdf$dim$lat$vals[corLat])>(netcdf$dim$lat$vals[corLat+1]-QNlat)){
     corLat=corLat+1
   }
   
@@ -26,8 +26,8 @@ coordenadas <- function(ID, lat, lon) {
     QNlon <- (lon)
   }
   
-  corLon<-max(which(pr2$dim$lon$vals<QNlon))
-  if ((QNlon-pr2$dim$lon$vals[corLon])>(pr2$dim$lon$vals[corLon+1]-QNlon)){
+  corLon<-max(which(netcdf$dim$lon$vals<QNlon))
+  if ((QNlon-netcdf$dim$lon$vals[corLon])>(netcdf$dim$lon$vals[corLon+1]-QNlon)){
     corLon=corLon+1
   }
   resultados <- list(corLat = corLat, corLon = corLon)
@@ -81,7 +81,7 @@ longitud <- -72.05
 
 # Se encuentran los indices de los archivos NetCDF que están más cercanas a esa
 # latitud y longitud:
-coordenadas <- coordenadas(ID = "GCM", lat = latitud, lon = longitud)
+coordenadas <- coordenadas(ID = "GCM", netcdf =pr2, lat = latitud, lon = longitud)
 
 corLat <- coordenadas$corLat
 corLon <- coordenadas$corLon
@@ -143,6 +143,15 @@ name3<-"CR2MET_pr_v2_0_mon_1979_2019_005deg.nc"
 
 # Abrimos el archivo tipo NetCDF
 pr3<-nc_open(name3)
+
+coordenadas_2 <- coordenadas(ID = "CR2MET", netcdf =pr3, lat = latitud, lon = longitud)
+
+corLat_2 <- coordenadas_2$corLat
+corLon_2 <- coordenadas_2$corLon
+
+
+
+
 
 # Encontramos la latitud menor
 corLat_2<-max(which(pr3$dim$lat$vals<QNlat))
