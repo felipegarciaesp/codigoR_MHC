@@ -13,14 +13,14 @@ setwd("C:/Users/Usuario/Codigos_R/leer_datos_NETCDF")
 getwd()
 
 # Definicion de funciones:
-coordenadas <- function(lat, lon) {
+coordenadas <- function(ID, lat, lon) {
   QNlat <- lat
   corLat <- max(which(pr2$dim$lat$vals<QNlat))
   if ((QNlat-pr2$dim$lat$vals[corLat])>(pr2$dim$lat$vals[corLat+1]-QNlat)){
     corLat=corLat+1
   }
   
-  if (lon < 0) {
+  if (lon < 0 && ID == "GCM") {
     QNlon <- (360 + lon)
   } else {
     QNlon <- (lon)
@@ -81,7 +81,7 @@ longitud <- -72.05
 
 # Se encuentran los indices de los archivos NetCDF que están más cercanas a esa
 # latitud y longitud:
-coordenadas <- coordenadas(lat = latitud, lon = longitud)
+coordenadas <- coordenadas(ID = "GCM", lat = latitud, lon = longitud)
 
 corLat <- coordenadas$corLat
 corLon <- coordenadas$corLon
