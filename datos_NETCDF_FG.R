@@ -13,21 +13,33 @@ setwd("C:/Users/Usuario/Codigos_R/leer_datos_NETCDF")
 getwd()
 
 # Definicion de funciones:
-coordenadas <- function(lat, lon) {
+coordenadas <- function(ID, lat, lon) {
+  
   QNlat <- lat
+  
   corLat <- max(which(pr2$dim$lat$vals<QNlat))
+  
   if ((QNlat-pr2$dim$lat$vals[corLat])>(pr2$dim$lat$vals[corLat+1]-QNlat)){
     corLat=corLat+1
   }
-  QNlon<-(360+lon)
+  
+  if (lon < 0 && ID = "GCM") {
+    QNlon <- (360 + lon)
+  } else {
+    QNlon <- lon
+  }
   
   corLon<-max(which(pr2$dim$lon$vals<QNlon))
+  
   if ((QNlon-pr2$dim$lon$vals[corLon])>(pr2$dim$lon$vals[corLon+1]-QNlon)){
     corLon=corLon+1
   }
+  
   resultados <- list(corLat = corLat, corLon = corLon)
+  
   return(resultados)
-}
+
+  }
 
 
 # Importar archivos NetCDF (los GCM).
@@ -71,12 +83,16 @@ data2 <- ncvar_get(pr2)
 # Se guadan los valores de latitud y longitud del punto que queremos
 # estudiar (Rio Cauquenes En Desembocadura, en este caso).
 
+# Importante que las coordenadas sean en Grados Decimales.
+# Que sean negativos del Ecuador hacia el Sur.
+# Que sean negativos desde el Pimer Meridiano hasta el AntiMeridiano hacia el Oeste.
+
 latitud <- -35.90
 longitud <- -72.05
 
 # Se encuentran los indices de los archivos NetCDF que están más cercanas a esa
 # latitud y longitud:
-coordenadas <- coordenadas(lat = latitud, lon = longitud)
+coordenadas <- coordenadas(ID = "GCM", lat = latitud, lon = longitud)
 
 corLat <- coordenadas$corLat
 corLon <- coordenadas$corLon
@@ -138,6 +154,14 @@ name3<-"CR2MET_pr_v2_0_mon_1979_2019_005deg.nc"
 
 # Abrimos el archivo tipo NetCDF
 pr3<-nc_open(name3)
+
+# Se encuentran los indices del archivo de CR2MET que están más cercanas a esa
+# latitud y longitud:
+coordenadas <- coordenadas(ID = "CR2MET", lat = latitud, lon = longitud)
+
+corLat_2 <- coordenadas$corLat
+corLon_2 <- coordenadas$corLon
+
 
 # Encontramos la latitud menor
 corLat_2<-max(which(pr3$dim$lat$vals<QNlat))
