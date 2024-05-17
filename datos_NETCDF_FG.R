@@ -19,7 +19,12 @@ coordenadas <- function(lat, lon) {
   if ((QNlat-pr2$dim$lat$vals[corLat])>(pr2$dim$lat$vals[corLat+1]-QNlat)){
     corLat=corLat+1
   }
-  QNlon<-(360+lon)
+  
+  if (lon < 0) {
+    QNlon <- (360 + lon)
+  } else {
+    QNlon <- (lon)
+  }
   
   corLon<-max(which(pr2$dim$lon$vals<QNlon))
   if ((QNlon-pr2$dim$lon$vals[corLon])>(pr2$dim$lon$vals[corLon+1]-QNlon)){
