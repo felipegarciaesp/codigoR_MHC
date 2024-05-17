@@ -81,10 +81,10 @@ longitud <- -72.05
 
 # Se encuentran los indices de los archivos NetCDF que están más cercanas a esa
 # latitud y longitud:
-coordenadas <- coordenadas(ID = "GCM", netcdf =pr2, lat = latitud, lon = longitud)
+coords_GCM <- coordenadas(ID = "GCM", netcdf =pr2, lat = latitud, lon = longitud)
 
-corLat <- coordenadas$corLat
-corLon <- coordenadas$corLon
+corLat <- coords_GCM$corLat
+corLon <- coords_GCM$corLon
 
 # Una vez que se encuentran las coordenadas más cercanas a la estación en el NetCDF,
 # puedo seleccionar dichas coordenadas, trabajar con ellas y olvidarme del resto del
@@ -144,30 +144,10 @@ name3<-"CR2MET_pr_v2_0_mon_1979_2019_005deg.nc"
 # Abrimos el archivo tipo NetCDF
 pr3<-nc_open(name3)
 
-coordenadas_2 <- coordenadas(ID = "CR2MET", netcdf =pr3, lat = latitud, lon = longitud)
+coords_CR2MET <- coordenadas(ID = "CR2MET", netcdf =pr3, lat = latitud, lon = longitud)
 
-corLat_2 <- coordenadas_2$corLat
-corLon_2 <- coordenadas_2$corLon
-
-
-
-
-
-# Encontramos la latitud menor
-corLat_2<-max(which(pr3$dim$lat$vals<QNlat))
-
-# Verificamos si la latitud que nos interesa está más cerca de la latitud
-# inferior o más cerca de la superior
-if ((QNlat-pr3$dim$lat$vals[corLat_2])>(pr3$dim$lat$vals[corLat_2+1]-QNlat)){
-  corLat_2=corLat_2+1}
-
-# Repetimos el proceso para las longitudes. Ahora tener cuidado que las
-# longitudes en el NetCDF de CR2MET están guardadas con un formato levemente
-# diferente
-QNlon_2<-(longitud)
-corLon_2<-max(which(pr3$dim$lon$vals<QNlon_2))
-if ((QNlon_2-pr3$dim$lon$vals[corLon_2])>(pr3$dim$lon$vals[corLon_2+1]-QNlon_2)){
-  corLon_2=corLon_2+1}
+corLat_2 <- coords_CR2MET$corLat
+corLon_2 <- coords_CR2MET$corLon
 
 # Si se quiere ser más eficiente en el uso de la memoria RAM del computador, o
 # en caso de que el archivo que se esté abriendo sea tan grande que el computador
