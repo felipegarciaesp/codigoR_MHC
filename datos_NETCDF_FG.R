@@ -76,8 +76,8 @@ data2 <- ncvar_get(pr2)
 # Se guadan los valores de latitud y longitud del punto que queremos
 # estudiar (Rio Cauquenes En Desembocadura, en este caso).
 
-latitud <- -35.90
-longitud <- -72.05
+latitud <- -24.38851 #-35.90
+longitud <- -69.16828 #-72.05
 
 # Se encuentran los indices de los archivos NetCDF que están más cercanas a esa
 # latitud y longitud:
