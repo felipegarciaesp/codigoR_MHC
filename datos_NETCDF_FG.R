@@ -117,6 +117,14 @@ year<-1850:2100
 # Concatenamos la serie de tiempo del período histórico, junto a la serie de tiempo del período
 # futuro "aux" y "aux2", para formar una única serie de tiempo "AUX"
 AUX<-c(aux,aux2)
+
+# Generamos un DataFrame con los datos concatenados
+df_pr <- data.frame(
+  "pr" = AUX
+)
+
+rownames(df_pr) <- year
+
 # Graficamos esta única serie de tiempo
 plot(AUX, type="l")
 
