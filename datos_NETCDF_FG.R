@@ -7,6 +7,7 @@ graphics.off()
 
 # Carga de paquetes
 library(ncdf4)
+library(xlsx)
 
 # Definicion directorio de trabajo
 setwd("C:/Users/Usuario/Codigos_R/leer_datos_NETCDF")
@@ -79,6 +80,13 @@ data2 <- ncvar_get(pr2)
 latitud <- -24.38851 #-35.90
 longitud <- -69.16828 #-72.05
 
+# Datos de la estacion y de la variable climatica estudiada:
+N_Estacion <- "1"
+Nombre_Estacion <- "LagunaSeca"
+var <- "pr"
+Escenario <- "ssp585"
+Nombre_Archivo <- paste0(N_Estacion, "_", Nombre_Estacion, "_", var, "_", Escenario, "_raw_analysis.xlsx")  
+
 # Se encuentran los indices de los archivos NetCDF que están más cercanas a esa
 # latitud y longitud:
 coords_GCM <- coordenadas(ID = "GCM", netcdf =pr2, lat = latitud, lon = longitud)
@@ -112,18 +120,26 @@ aux2<-data2[corLon,corLat, ]* (1000*3600*24*30/1000)
 # precipitaciones de los NetCDF. Primero uno a nivel mensual, luego uno a nivel anual.
 
 # Generamos una serie de tiempo con los años para graficar
-year<-1850:2100
+#year<-1850:2100
 
 # Concatenamos la serie de tiempo del período histórico, junto a la serie de tiempo del período
 # futuro "aux" y "aux2", para formar una única serie de tiempo "AUX"
 AUX<-c(aux,aux2)
 
+# Generamos un vector de fechas a nivel mensual desde 1850-01 hasta 2100-12:
+fechas <- seq(from = as.Date("1850-01-01"), to = as.Date("2100-12-31"), by = "month")
+
 # Generamos un DataFrame con los datos concatenados
 df_pr <- data.frame(
-  "pr" = AUX
+  Fecha = fechas, pr = AUX
 )
 
-rownames(df_pr) <- year
+df_pr_filtrado <- subset(df_pr, Fecha >= as.Date("1950-01-01") &
+                           Fecha <= as.Date("2100-12-01"))
+
+# Se exporta el dataframe a Excel
+write.xlsx(df_pr_filtrado, Nombre_Archivo)
+
 
 # Graficamos esta única serie de tiempo
 plot(AUX, type="l")
