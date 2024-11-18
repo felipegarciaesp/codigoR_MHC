@@ -35,6 +35,13 @@ coordenadas <- function(ID, netcdf, lat, lon) {
   return(resultados)
 }
 
+nombre_GCM <- function(filename) {
+  nombre <- gsub("pr_Amon_", "", filename) #Se borra el prefijo.
+  nombre <- gsub("historical_", "", nombre) #Se borra el historical.
+  nombre <- sub("_gn.*", "", nombre) #Se borra todo a la derecha de _gn* (inclusive)
+  return(nombre)
+}
+
 
 # Importar archivos NetCDF (los GCM).
 name <- "pr_Amon_ACCESS-CM2_historical_r1i1p1f1_gn_185001-201412.nc"
@@ -43,6 +50,7 @@ name2 <- "pr_Amon_ACCESS-CM2_ssp585_r1i1p1f1_gn_201501-210012.nc"
 
 # Comando para abrir arhivos tipo NetCDF:
 pr <- nc_open(name)
+
 
 # Comando para visualizar el archivo NetCDF que se ha importado:
 View(pr)
