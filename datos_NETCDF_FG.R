@@ -42,6 +42,8 @@ nombre_GCM <- function(filename) {
   return(nombre)
 }
 
+# Lectura de archivos netcdf en carpeta y posterior exportacion a Excel.
+
 
 # Importar archivos NetCDF (los GCM).
 name <- "pr_Amon_ACCESS-CM2_historical_r1i1p1f1_gn_185001-201412.nc"
