@@ -51,6 +51,10 @@ name2 <- "pr_Amon_ACCESS-CM2_ssp585_r1i1p1f1_gn_201501-210012.nc"
 # Comando para abrir arhivos tipo NetCDF:
 pr <- nc_open(name)
 
+# Extraemos el nombre del GCM:
+nombre <- pr$filename
+nombre <- nombre_GCM(nombre)
+
 
 # Comando para visualizar el archivo NetCDF que se ha importado:
 View(pr)
@@ -144,6 +148,9 @@ df_pr <- data.frame(
 
 df_pr_filtrado <- subset(df_pr, Fecha >= as.Date("1950-01-01") &
                            Fecha <= as.Date("2100-12-01"))
+
+# Cambiamos el nombre de la columna que tiene las variables a estudiar por el nombre del GCM:
+colnames(df_pr_filtrado)[colnames(df_pr_filtrado)=='pr'] <- nombre
 
 # Se exporta el dataframe a Excel
 write.xlsx(df_pr_filtrado, Nombre_Archivo)
