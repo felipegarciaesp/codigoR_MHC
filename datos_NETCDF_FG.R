@@ -13,6 +13,9 @@ library(xlsx)
 setwd("C:/Users/Usuario/Codigos_R/leer_datos_NETCDF")
 getwd()
 
+# Directorio que contiene archivos netcdf:
+netcdf_files_CMIP6 <- paste0(getwd(),"/netcdf_files/CMIP6")
+
 # Definicion de funciones:
 coordenadas <- function(ID, netcdf, lat, lon) {
   QNlat <- lat
@@ -44,6 +47,8 @@ nombre_GCM <- function(filename) {
 }
 
 # Lectura de archivos netcdf en carpeta y posterior exportacion a Excel.
+
+
 
 
 # Importar archivos NetCDF (los GCM).
