@@ -60,6 +60,7 @@ contiene <- function(texto, cadena_original) {
 
 # Lectura de archivos netcdf en carpeta y posterior exportacion a Excel.
 
+## Seccion en donde se extraen los nombres de cada GCM:
 # 1) Directorio que contiene archivos netcdf:
 netcdf_files_CMIP6 <- paste0(getwd(),"/netcdf_files/CMIP6")
 
@@ -69,6 +70,12 @@ archivos <- list.files(netcdf_files_CMIP6, pattern ="\\.nc$", full.names = TRUE)
 
 # 3) Obtener solo los nombres de los archivos:
 nombres_netcdf <- basename(archivos)
+
+# 4) Nos quedamos con una lista que solo contiene los archivos historicos:
+nombres_netcdf <- nombres_netcdf[contiene("historical",nombres_netcdf)=='TRUE']
+
+# 5) Nos quedamos con una lista que contiene solamente los nombres de los GCM:
+nombres_netcdf <- nombre_GCM(nombres_netcdf)
 
 
 # Importar archivos NetCDF (los GCM).
