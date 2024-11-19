@@ -13,6 +13,9 @@ library(xlsx)
 setwd("C:/Users/Usuario/Codigos_R/leer_datos_NETCDF")
 getwd()
 
+# Definición de escenario cuyos datos se quieren exportar a Excel (ssp245, ssp585, etc):
+escenario = "ssp585"
+
 # Definicion de funciones:
 coordenadas <- function(ID, netcdf, lat, lon) {
   QNlat <- lat
@@ -43,7 +46,6 @@ nombre_GCM <- function(filename) {
   return(nombre)
 }
 
-
 # Funcion que arroja True or False si lo que se ingresa como "texto" está o no en
 # la cadena original.
 contiene <- function(texto, cadena_original) {
@@ -51,31 +53,51 @@ contiene <- function(texto, cadena_original) {
   return(boolean)
 }
 
-# Funcion que remueve del nombre los textos "historical_", "ssp245" o "ssp585".
-# remove_scenario <- function(filename) {
-#  if contiene("historical", filename) {
-#    nombre <- gsub("historical_", "", filename)
-#  } else if 
-#}
+# Función para abrir los netcdf, extraer la variable que nos interesa y rellenar el
+# dataframe vacío.
+ExtraerRellenar <- function(name, df) {
+  # name: nombre del archivo netcdf al que se extraerá la variable, que puede ser
+  # tas, pr, hurs, rsds, ... depende de lo que se haya descargado.
+  #var <- nc_open(name) #Se abre archivo netcdf.
+  #data <- ncvar_get(var) #Se extrae la variable de interés.
+  #rm(var) #Se remueve la operación inicial, ya no se necesita esta info.
+  
+  for (col_name in colnames(df)) {
+    
+  }
+  
+  
+  nc_close(var) #Se cierra archivo netcdf.
+}
+
 
 # Lectura de archivos netcdf en carpeta y posterior exportacion a Excel.
 
-## Seccion en donde se extraen los nombres de cada GCM:
 # 1) Directorio que contiene archivos netcdf:
 netcdf_files_CMIP6 <- paste0(getwd(),"/netcdf_files/CMIP6")
 
-# 2) Lista de archivos NNetCDF en el directorio:
+# 1.1) Seteamos este directorio como el nuevo directorio de trabajo.
+setwd(netcdf_files_CMIP6)
+
+# 2) Lista de archivos NetCDF en el directorio:
 # Este codigo va a arrojar una lista con la ruta completa, desde C:/User/Usuario ...
 archivos <- list.files(netcdf_files_CMIP6, pattern ="\\.nc$", full.names = TRUE)
 
 # 3) Obtener solo los nombres de los archivos:
-nombres_netcdf <- basename(archivos)
+NombresArchivos<- basename(archivos)
+nombres_netcdf <- NombresArchivos
 
 # 4) Nos quedamos con una lista que solo contiene los archivos historicos:
 nombres_netcdf <- nombres_netcdf[contiene("historical",nombres_netcdf)=='TRUE']
 
 # 5) Nos quedamos con una lista que contiene solamente los nombres de los GCM:
 nombres_netcdf <- nombre_GCM(nombres_netcdf)
+
+# 6) Creamos un dataframe vacío con los GCM como nombres de las columnas:
+df <- data.frame(matrix(ncol = length(nombres_netcdf), nrow = 0))
+colnames(df) <- nombres_netcdf
+
+
 
 
 # Importar archivos NetCDF (los GCM).
