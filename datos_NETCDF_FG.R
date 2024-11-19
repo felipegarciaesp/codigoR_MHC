@@ -44,11 +44,19 @@ nombre_GCM <- function(filename) {
 }
 
 
-
+# Funcion que arroja True or False si lo que se ingresa como "texto" está o no en
+# la cadena original.
 contiene <- function(texto, cadena_original) {
   boolean <- grepl(texto, cadena_original)
   return(boolean)
 }
+
+# Funcion que remueve del nombre los textos "historical_", "ssp245" o "ssp585".
+# remove_scenario <- function(filename) {
+#  if contiene("historical", filename) {
+#    nombre <- gsub("historical_", "", filename)
+#  } else if 
+#}
 
 # Lectura de archivos netcdf en carpeta y posterior exportacion a Excel.
 
