@@ -13,9 +13,6 @@ library(xlsx)
 setwd("C:/Users/Usuario/Codigos_R/leer_datos_NETCDF")
 getwd()
 
-# Definición de escenario cuyos datos se quieren exportar a Excel (ssp245, ssp585, etc):
-escenario = "ssp585"
-
 # Definicion de funciones:
 coordenadas <- function(ID, netcdf, lat, lon) {
   QNlat <- lat
@@ -55,7 +52,7 @@ contiene <- function(texto, cadena_original) {
 
 # Función para abrir los netcdf, extraer la variable que nos interesa y rellenar el
 # dataframe vacío.
-ExtraerRellenar <- function(name, df) {
+ExtraerRellenar <- function(df, nombres_archivos) {
   # name: nombre del archivo netcdf al que se extraerá la variable, que puede ser
   # tas, pr, hurs, rsds, ... depende de lo que se haya descargado.
   #var <- nc_open(name) #Se abre archivo netcdf.
@@ -63,11 +60,13 @@ ExtraerRellenar <- function(name, df) {
   #rm(var) #Se remueve la operación inicial, ya no se necesita esta info.
   
   for (col_name in colnames(df)) {
-    
+    archivos <- grep(col_name, nombres_archivos, value = TRUE)
+    print('Nombres de la tanda de archivos')
+    print(archivos)
   }
   
   
-  nc_close(var) #Se cierra archivo netcdf.
+  #nc_close(var) #Se cierra archivo netcdf.
 }
 
 
@@ -97,6 +96,12 @@ nombres_netcdf <- nombre_GCM(nombres_netcdf)
 df <- data.frame(matrix(ncol = length(nombres_netcdf), nrow = 0))
 colnames(df) <- nombres_netcdf
 
+for (col_name in colnames(df)) {
+  archivos <- grep(col_name, NombresArchivos, value = TRUE)
+  print('Nombres de la tanda de archivos')
+  print(archivos)
+  print(col_name)
+}
 
 
 
