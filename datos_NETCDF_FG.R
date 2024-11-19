@@ -52,21 +52,65 @@ contiene <- function(texto, cadena_original) {
 
 # Función para abrir los netcdf, extraer la variable que nos interesa y rellenar el
 # dataframe vacío.
-ExtraerRellenar <- function(df, nombres_archivos) {
-  # name: nombre del archivo netcdf al que se extraerá la variable, que puede ser
-  # tas, pr, hurs, rsds, ... depende de lo que se haya descargado.
-  #var <- nc_open(name) #Se abre archivo netcdf.
-  #data <- ncvar_get(var) #Se extrae la variable de interés.
-  #rm(var) #Se remueve la operación inicial, ya no se necesita esta info.
+ExtraerRellenar <- function(name_hist, name_fut, df, col, ID, lat, lon) {
+  # name_hist: nombre del archivo netcdf historico
+  # name_fut: nombre del archivo netcdf futuro.
+  # col: es el numero de columna del df que se va a rellenar.
+  # A ambos archivos se les extraerá la data, ya sea pr, tas, hurs, rsds, o lo que
+  # sea que se haya descargado.
   
-  for (col_name in colnames(df)) {
-    archivos <- grep(col_name, nombres_archivos, value = TRUE)
-    print('Nombres de la tanda de archivos')
-    print(archivos)
-  }
+  #Pasos para extraer data de netcdf historico:
+  var_hist <- nc_open(name_hist) #abrir netcdf historico.
+  data_hist <- ncvar_get(var_hist) #extraer data de interes.
+  rm(var_hist) #removemos var_hist, ya no lo ocuparemos.
+  
+  #Se repiten los pasos para extraer data de netcdf futuro:
+  var_fut <- nc_open(name_fut)
+  data_fut <- ncvar_get(var_fut)
+  
+  #Todavia no se remueve el var_fut porque lo utilizaremos para identificar las 
+  #coordenadas:
+  
+  coords_GCM <- coordenadas(ID, var_fut, lat, lon)
+  
+  corLat <- coords_GCM$corLat
+  corLon <- coords_GCM$corLon
+  
+  # Dentro de los archivos "data_hist" y "data_fut", tenemos en la primera coordenada la 
+  # longitud, en la segunda la latitud y en la tercera la serie de tiempo de 
+  # precipitaciones, por lo que le entregamos la primera coordenada y la segunda, 
+  # la tercera se deja vacía, dado que queremos obtener la serie de tiempo completa
+  # Se mutiplica por un factor para tener una serie de precipitaciones mensuales en mm.
+  # Se asume que los días del mes tienen 30 días.
+  
+  aux_hist<-data_hist[corLon,corLat, ]* (1000*3600*24*30/1000)
+  aux_fut<-data_fut[corLon,corLat, ]* (1000*3600*24*30/1000)
+  
+  # Finalmente, tenemos que en aux_hist y aux_fut quedan almacenados una serie de 
+  # tiempo mensual de precipitaciones simuladas por el GCM para el período histórico 
+  # y para el futuro.
+  
+  # Concatenamos la serie de tiempo del período histórico, junto a la serie de 
+  # tiempo del período futuro "aux_hist" y "aux_fut", para formar una única serie 
+  # de tiempo "AUX"
+  AUX<-c(aux_hist, aux_fut)
+  
+  # Generamos un vector de fechas a nivel mensual desde 1850-01 hasta 2100-12.
+  # Es de notar que estamos considerando que los GCM históricos comienzan en 01/1850 y
+  # que los GCM futuros terminan en 12/2100.
+  fechas <- seq(from = as.Date("1850-01-01"), to = as.Date("2100-12-31"), by = "month")
+  
+  # ACA QUEDÉ! 19/11/2024
   
   
-  #nc_close(var) #Se cierra archivo netcdf.
+  # Generamos un DataFrame con los datos concatenados
+  df_pr <- data.frame(
+    Fecha = fechas, pr = AUX
+  )
+  
+  df_pr_filtrado <- subset(df_pr, Fecha >= as.Date("1950-01-01") &
+                             Fecha <= as.Date("2100-12-01"))
+  
 }
 
 
@@ -96,11 +140,15 @@ nombres_netcdf <- nombre_GCM(nombres_netcdf)
 df <- data.frame(matrix(ncol = length(nombres_netcdf), nrow = 0))
 colnames(df) <- nombres_netcdf
 
-for (col_name in colnames(df)) {
-  archivos <- grep(col_name, NombresArchivos, value = TRUE)
-  print('Nombres de la tanda de archivos')
-  print(archivos)
-  print(col_name)
+# 7) Obtenemos los nombres de los archivos netcdf de 2 en 2.
+# Este paso es importante, ya que vamos a asumir lo siguiente para este codigo:
+# a) La carpeta con los archivos netcdf siempre van a tener el archivo con data
+#    histórica + el archivo con el escenario a evaluar (ssp245, ssp585, etc).
+# b) La carpeta va a ordenar los archivos de manera alfabetica, por lo que para
+#    cada GCM tendremos el archivo historico seguido del escenario futuro a evaluar.
+
+for (i in seq(1, length(NombresArchivos), by = 2)) {
+  
 }
 
 
