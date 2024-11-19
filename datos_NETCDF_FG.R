@@ -62,7 +62,8 @@ ExtraerRellenar <- function(name_hist, name_fut, df, col, ID, lat, lon) {
   #Pasos para extraer data de netcdf historico:
   var_hist <- nc_open(name_hist) #abrir netcdf historico.
   data_hist <- ncvar_get(var_hist) #extraer data de interes.
-  rm(var_hist) #removemos var_hist, ya no lo ocuparemos.
+  ##rm(var_hist) #removemos var_hist, ya no lo ocuparemos.
+  
   
   #Se repiten los pasos para extraer data de netcdf futuro:
   var_fut <- nc_open(name_fut)
@@ -100,17 +101,10 @@ ExtraerRellenar <- function(name_hist, name_fut, df, col, ID, lat, lon) {
   # que los GCM futuros terminan en 12/2100.
   fechas <- seq(from = as.Date("1850-01-01"), to = as.Date("2100-12-31"), by = "month")
   
-  # ACA QUEDÉ! 19/11/2024
+  # Se rellenan los datos historicos y futuros del GCM en cuestión.
+  df[, col] <- AUX
   
-  
-  # Generamos un DataFrame con los datos concatenados
-  df_pr <- data.frame(
-    Fecha = fechas, pr = AUX
-  )
-  
-  df_pr_filtrado <- subset(df_pr, Fecha >= as.Date("1950-01-01") &
-                             Fecha <= as.Date("2100-12-01"))
-  
+  return(df)
 }
 
 
@@ -136,7 +130,14 @@ nombres_netcdf <- nombres_netcdf[contiene("historical",nombres_netcdf)=='TRUE']
 # 5) Nos quedamos con una lista que contiene solamente los nombres de los GCM:
 nombres_netcdf <- nombre_GCM(nombres_netcdf)
 
-# 6) Creamos un dataframe vacío con los GCM como nombres de las columnas:
+# 6) Generamos un vector de fechas a nivel mensual desde 1850-01 hasta 2100-12:
+fechas <- seq(from = as.Date("1850-01-01"), to = as.Date("2100-12-31"), by = "month")
+
+# 7) Creamos un dataframe vacío con los GCM como nombres de las columnas.
+# Es importante que el dataframe vacio sea inicializado con la cantidad de filas
+# que tendrá una vez rellenado.
+
+#ACÁ QUEDÉ, SIGUE LAS ISNTRUCCIONES DE COPILOT PARA ARREGLAR LA INICIALIZACION DE ESTE DATAFRAME.
 df <- data.frame(matrix(ncol = length(nombres_netcdf), nrow = 0))
 colnames(df) <- nombres_netcdf
 
