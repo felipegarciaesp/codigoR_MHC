@@ -132,25 +132,63 @@ nombres_netcdf <- nombre_GCM(nombres_netcdf)
 
 # 6) Generamos un vector de fechas a nivel mensual desde 1850-01 hasta 2100-12:
 fechas <- seq(from = as.Date("1850-01-01"), to = as.Date("2100-12-31"), by = "month")
+num_fechas <- length(fechas)
 
 # 7) Creamos un dataframe vacío con los GCM como nombres de las columnas.
 # Es importante que el dataframe vacio sea inicializado con la cantidad de filas
 # que tendrá una vez rellenado.
 
-#ACÁ QUEDÉ, SIGUE LAS ISNTRUCCIONES DE COPILOT PARA ARREGLAR LA INICIALIZACION DE ESTE DATAFRAME.
-df <- data.frame(matrix(ncol = length(nombres_netcdf), nrow = 0))
+df <- data.frame(matrix(ncol = length(nombres_netcdf), nrow = num_fechas))
 colnames(df) <- nombres_netcdf
+rownames(df) <- fechas
 
-# 7) Obtenemos los nombres de los archivos netcdf de 2 en 2.
+# 7) Se indican las coordenadas del punto a estudiar. Deben estar en grados decimales.
+
+latitud <- -24.38851
+longitud <- -69.16828
+
+# 8) Obtenemos los nombres de los archivos netcdf de 2 en 2.
 # Este paso es importante, ya que vamos a asumir lo siguiente para este codigo:
 # a) La carpeta con los archivos netcdf siempre van a tener el archivo con data
 #    histórica + el archivo con el escenario a evaluar (ssp245, ssp585, etc).
 # b) La carpeta va a ordenar los archivos de manera alfabetica, por lo que para
 #    cada GCM tendremos el archivo historico seguido del escenario futuro a evaluar.
 
+col = 1
 for (i in seq(1, length(NombresArchivos), by = 2)) {
-  
+  name_hist <- NombresArchivos[i]
+  name_fut <- NombresArchivos[i+1]
+  # Se llama a la funcion ExtraerRellenar para extraer la data de los GCM y rellenar
+  # el dataframe df.
+  # Recordar que el ID es para diferenciar un GCM del producto CR2MET.
+  df <- ExtraerRellenar(name_hist, name_fut, df, col, "GCM",latitud, longitud)
+  col <- col + 1
 }
+
+# 9) Se indican datos de la estacion y de la variable climatica estudiada:
+N_Estacion <- "1"
+Nombre_Estacion <- "LagunaSeca"
+var <- "pr"
+Escenario <- "ssp585"
+Nombre_Archivo <- paste0(N_Estacion, "_", Nombre_Estacion, "_", var, "_", Escenario, "_raw_analysis.xlsx")  
+
+# 10) Exportacion a Excel:
+# Primero se filtra el dataframe para las fechas a evaluar (no nos va a interesar
+# toda la data desde 1850):
+
+# Se definen las fechas de inicio y final que interesa para el estudio:
+fecha_inicio <- as.Date("1950-01-01")
+fecha_fin <- as.Date("2100-12-01")
+
+# Se filtran las filas del df donde las fechas están dentro del rango especificado:
+df_filtrado <- df[rownames(df) >= fecha_inicio & rownames(df) <= fecha_fin, ]
+
+# Se cambia el directorio y se exporta el dataframe a Excel:
+# El directorio se cambia nuevamente para que el Excel quede guardado en la 
+# misma ruta del codigo y no donde están los archivos netcdf.
+setwd("C:/Users/Usuario/Codigos_R/leer_datos_NETCDF")
+write.xlsx(df_filtrado, Nombre_Archivo)
+
 
 
 
