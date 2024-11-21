@@ -69,6 +69,10 @@ ExtraerRellenar <- function(name_hist, name_fut, df, col, ID, lat, lon) {
   var_fut <- nc_open(name_fut)
   data_fut <- ncvar_get(var_fut)
   
+  #Cerramos los archivos netcdf:
+  nc_close(var_hist)
+  nc_close(var_fut)
+  
   #Todavia no se remueve el var_fut porque lo utilizaremos para identificar las 
   #coordenadas:
   
