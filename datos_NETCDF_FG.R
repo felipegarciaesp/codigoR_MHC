@@ -10,6 +10,8 @@ library(ncdf4)
 library(xlsx)
 
 # Definicion directorio de trabajo
+# Es importante que el directorio de trabajo no sea muy largo, podría ocurrir que
+# te lea dos veces el mismo archivo netcdf.
 setwd("C:/Users/Usuario/Codigos_R/leer_datos_NETCDF")
 getwd()
 
