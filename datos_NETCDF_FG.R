@@ -41,7 +41,7 @@ coordenadas <- function(ID, netcdf, lat, lon) {
 nombre_GCM <- function(filename) {
   nombre <- gsub("pr_Amon_", "", filename) #Se borra el prefijo.
   nombre <- gsub("historical_", "", nombre) #Se borra el historical.
-  nombre <- sub("_gn.*", "", nombre) #Se borra todo a la derecha de _gn* (inclusive)
+  nombre <- sub("(_gn|_gr).*", "", nombre) #Se borra todo a la derecha de _gn o _gr (inclusive)
   return(nombre)
 }
 
