@@ -130,15 +130,35 @@ archivos <- list.files(netcdf_files_CMIP6, pattern ="\\.nc$", full.names = TRUE)
 NombresArchivos<- basename(archivos)
 nombres_netcdf <- NombresArchivos
 
-# 4) Nos quedamos con una lista que solo contiene los archivos historicos:
-nombres_netcdf <- nombres_netcdf[contiene("historical",nombres_netcdf)=='TRUE']
+# 4) Obtenemos 3 listas, cada uno con los nombres de los escenarios a evaluar 
+# (historico, ssp245, ssp585):
+nombres_netcdf_hist <- nombres_netcdf[contiene("historical",nombres_netcdf)=='TRUE']
+nombres_netcdf_sc1 <- nombres_netcdf[contiene("ssp245",nombres_netcdf)=='TRUE']
+nombres_netcdf_sc2 <- nombres_netcdf[contiene("ssp585",nombres_netcdf)=='TRUE']
 
 # 5) Nos quedamos con una lista que contiene solamente los nombres de los GCM:
-nombres_netcdf <- nombre_GCM(nombres_netcdf)
+nombres_netcdf <- nombre_GCM(nombres_netcdf_hist) #Podemos ocupar el historico o cualquier otro.
 
 # 6) Generamos un vector de fechas a nivel mensual desde 1850-01 hasta 2100-12:
 fechas <- seq(from = as.Date("1850-01-01"), to = as.Date("2100-12-31"), by = "month")
 num_fechas <- length(fechas)
+
+# 7) Creamos un dataframe que contengan los nombres de estos archivos:
+nombres_gcm <- data.frame(
+  'hist' = nombres_netcdf_hist,
+  'ssp245' = nombres_netcdf_sc1,
+  'ssp585' = nombres_netcdf_sc2
+)
+
+# Transpone el dataframe para que en las columnas queden los nombres de los
+# modelos:
+nombres_gcm <- t(nombres_gcm)
+
+# Cambiamos los nombres de las columnas para que tengan el nombre de cada modelo
+# evaluado
+colnames(nombres_gcm) <- nombres_netcdf
+
+#ACA QUEDE (29-DIC-2024) SEGUIR MODIFICANDO EL CODIGO DESDE ACA.
 
 # 7) Creamos un dataframe vacío con los GCM como nombres de las columnas.
 # Es importante que el dataframe vacio sea inicializado con la cantidad de filas
