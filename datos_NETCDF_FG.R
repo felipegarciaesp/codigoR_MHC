@@ -198,6 +198,9 @@ longitud <- -69.16828
 # b) La carpeta va a ordenar los archivos de manera alfabetica, por lo que para
 #    cada GCM tendremos el archivo historico seguido del escenario futuro a evaluar.
 
+#ACA QUEDE (2 DE ENRO 2025) LO QUE TIENES QUE HACER AHORA ES UN CICLO FOR CON EL CUAL IR
+#RELLENANDO EL DATAFRAME VACIO DF CON LA FUNCION EXTRAERRELLENAR QUE ACABAS DE MODIFICAR.
+
 #col = 1
 #for (i in seq(1, length(NombresArchivos), by = 2)) {
 #  name_hist <- NombresArchivos[i]
