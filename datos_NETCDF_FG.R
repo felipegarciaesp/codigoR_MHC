@@ -54,61 +54,71 @@ contiene <- function(texto, cadena_original) {
 
 # Función para abrir los netcdf, extraer la variable que nos interesa y rellenar el
 # dataframe vacío.
-ExtraerRellenar <- function(name_hist, name_fut, df, col, ID, lat, lon) {
+ExtraerRellenar <- function(name_hist, name_fut_1, name_fut_2, df, col, ID, lat, lon) {
   # name_hist: nombre del archivo netcdf historico
-  # name_fut: nombre del archivo netcdf futuro.
+  # name_fut1: nombre del archivo netcdf futuro del escenario 1 (ssp245).
+  # name_fut2: nombre del archivo netcdf futuro del escenario 2 (ssp585).
   # col: es el numero de columna del df que se va a rellenar.
-  # A ambos archivos se les extraerá la data, ya sea pr, tas, hurs, rsds, o lo que
+  # A los tres archivos se les extraerá la data, ya sea pr, tas, hurs, rsds, o lo que
   # sea que se haya descargado.
   
   #Pasos para extraer data de netcdf historico:
   var_hist <- nc_open(name_hist) #abrir netcdf historico.
   data_hist <- ncvar_get(var_hist) #extraer data de interes.
-  ##rm(var_hist) #removemos var_hist, ya no lo ocuparemos.
+
+  #Se repiten los pasos para extraer data de los dos netcdf futuro:
+  var_fut_1 <- nc_open(name_fut_1)
+  data_fut_1 <- ncvar_get(var_fut_1)
   
+  var_fut_2 <- nc_open(name_fut_2)
+  data_fut_2 <- nc_open(var_fut_2)
   
-  #Se repiten los pasos para extraer data de netcdf futuro:
-  var_fut <- nc_open(name_fut)
-  data_fut <- ncvar_get(var_fut)
+  #Vamos a ocupar el var_hist para identificar el nodo del archivo netcdf que
+  #nos va a servir para el area de estudio:
   
-  #Cerramos los archivos netcdf:
-  nc_close(var_hist)
-  nc_close(var_fut)
-  
-  #Todavia no se remueve el var_fut porque lo utilizaremos para identificar las 
-  #coordenadas:
-  
-  coords_GCM <- coordenadas(ID, var_fut, lat, lon)
+  coords_GCM <- coordenadas(ID, var_hist, lat, lon)
   
   corLat <- coords_GCM$corLat
   corLon <- coords_GCM$corLon
   
-  # Dentro de los archivos "data_hist" y "data_fut", tenemos en la primera coordenada la 
-  # longitud, en la segunda la latitud y en la tercera la serie de tiempo de 
-  # precipitaciones, por lo que le entregamos la primera coordenada y la segunda, 
-  # la tercera se deja vacía, dado que queremos obtener la serie de tiempo completa
-  # Se mutiplica por un factor para tener una serie de precipitaciones mensuales en mm.
-  # Se asume que los días del mes tienen 30 días.
+  # Dentro de los archivos "data_hist", "data_fut_1" y "data_fut_2", tenemos en 
+  # la primera coordenada la longitud, en la segunda la latitud y en la tercera 
+  # la serie de tiempo de precipitaciones, por lo que le entregamos la primera 
+  # coordenada y la segunda, la tercera se deja vacía, dado que queremos obtener 
+  # la serie de tiempo completa. Se mutiplica por un factor para tener una serie 
+  # de precipitaciones mensuales en mm. Se asume que los días del mes tienen 30 días.
   
-  aux_hist<-data_hist[corLon,corLat, ]* (1000*3600*24*30/1000)
-  aux_fut<-data_fut[corLon,corLat, ]* (1000*3600*24*30/1000)
+  aux_hist  <- data_hist[corLon,corLat, ] * (1000*3600*24*30/1000)
+  aux_fut_1 <- data_fut_1[corLon,corLat, ] * (1000*3600*24*30/1000)
+  aux_fut_2 <- data_fut_2[corLon,corLat, ] * (1000*3600*24*30/1000)
   
-  # Finalmente, tenemos que en aux_hist y aux_fut quedan almacenados una serie de 
-  # tiempo mensual de precipitaciones simuladas por el GCM para el período histórico 
-  # y para el futuro.
+  # Finalmente, tenemos que en aux_hist, aux_fut_1 y aux_fut_2 quedan almacenados 
+  # una serie de tiempo mensual de precipitaciones simuladas por el GCM para el 
+  # período histórico y para el periodo futuro.
   
-  # Concatenamos la serie de tiempo del período histórico, junto a la serie de 
-  # tiempo del período futuro "aux_hist" y "aux_fut", para formar una única serie 
-  # de tiempo "AUX"
-  AUX<-c(aux_hist, aux_fut)
+  # Concatenamos dos series de tiempo: una que tenga la serie historica seguida
+  # de la serie del escenario 1 (ssp245) y otra que tenga la serie historica seguida
+  # de la serie del escenario 2 (ssp585).
+  # De esta forma obtenemos:
+  # AUX_1: hist + ssp245.
+  # AUX_2: hist + ssp585.
+  
+  AUX_1<-c(aux_hist, aux_fut_1)
+  AUX_2<-c(aux_hist, aux_fut_2)
   
   # Generamos un vector de fechas a nivel mensual desde 1850-01 hasta 2100-12.
   # Es de notar que estamos considerando que los GCM históricos comienzan en 01/1850 y
   # que los GCM futuros terminan en 12/2100.
   fechas <- seq(from = as.Date("1850-01-01"), to = as.Date("2100-12-31"), by = "month")
   
-  # Se rellenan los datos historicos y futuros del GCM en cuestión.
-  df[, col] <- AUX
+  # Se rellenan los datos historicos y futuros (ambos escenarios) del GCM en cuestión.
+  df[[1]][, col] <- AUX_1
+  df[[2]][, col] <- AUX_2
+  
+  #Cerramos los archivos netcdf:
+  nc_close(var_hist)
+  nc_close(var_fut_1)
+  nc_close(var_fut_2)
   
   return(df)
 }
@@ -158,17 +168,25 @@ nombres_gcm <- t(nombres_gcm)
 # evaluado
 colnames(nombres_gcm) <- nombres_netcdf
 
-#ACA QUEDE (29-DIC-2024) SEGUIR MODIFICANDO EL CODIGO DESDE ACA.
-
-# 7) Creamos un dataframe vacío con los GCM como nombres de las columnas.
+# 8) Creamos un dataframe vacío con los GCM como nombres de las columnas.
 # Es importante que el dataframe vacio sea inicializado con la cantidad de filas
 # que tendrá una vez rellenado.
 
-df <- data.frame(matrix(ncol = length(nombres_netcdf), nrow = num_fechas))
-colnames(df) <- nombres_netcdf
-rownames(df) <- fechas
+df_empty <- data.frame(matrix(ncol = length(nombres_netcdf), nrow = num_fechas))
 
-# 7) Se indican las coordenadas del punto a estudiar. Deben estar en grados decimales.
+df <- list(
+  df_empty,
+  df_empty
+)
+
+# Asignar nombres de columnas y filas a cada dataframe en la lista:
+for (i in 1:2) {
+  colnames(df[[i]]) <- nombres_netcdf
+  rownames(df[[i]]) <- fechas
+}
+
+
+# 9) Se indican las coordenadas del punto a estudiar. Deben estar en grados decimales.
 
 latitud <- -24.38851
 longitud <- -69.16828
@@ -180,16 +198,19 @@ longitud <- -69.16828
 # b) La carpeta va a ordenar los archivos de manera alfabetica, por lo que para
 #    cada GCM tendremos el archivo historico seguido del escenario futuro a evaluar.
 
-col = 1
-for (i in seq(1, length(NombresArchivos), by = 2)) {
-  name_hist <- NombresArchivos[i]
-  name_fut <- NombresArchivos[i+1]
-  # Se llama a la funcion ExtraerRellenar para extraer la data de los GCM y rellenar
-  # el dataframe df.
-  # Recordar que el ID es para diferenciar un GCM del producto CR2MET.
-  df <- ExtraerRellenar(name_hist, name_fut, df, col, "GCM",latitud, longitud)
-  col <- col + 1
-}
+#col = 1
+#for (i in seq(1, length(NombresArchivos), by = 2)) {
+#  name_hist <- NombresArchivos[i]
+#  name_fut <- NombresArchivos[i+1]
+#  # Se llama a la funcion ExtraerRellenar para extraer la data de los GCM y rellenar
+#  # el dataframe df.
+#  # Recordar que el ID es para diferenciar un GCM del producto CR2MET.
+#  df <- ExtraerRellenar(name_hist, name_fut, df, col, "GCM",latitud, longitud)
+#  col <- col + 1
+#}
+
+# 10) Se procede a leer cada archivo netcdf, se extraen los resultados de interes
+# y se pasa la información a un archivo Excel.
 
 # 9) Se indican datos de la estacion y de la variable climatica estudiada:
 N_Estacion <- "1"
